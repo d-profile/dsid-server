@@ -11,7 +11,7 @@ async def root() -> dict:
     }
 
 @app.post("/student/register")
-async def root() -> dict:
+async def student_register() -> dict:
     await StudentService.register()
     return {
         "message": "ok"
