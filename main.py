@@ -6,9 +6,15 @@ app = FastAPI()
 
 @app.get("/")
 async def root() -> dict:
-    await StudentService.register()
     return {
         "message": "hello"
+    }
+
+@app.post("/student/register")
+async def root() -> dict:
+    await StudentService.register()
+    return {
+        "message": "ok"
     }
 
 if __name__ == "__main__":
