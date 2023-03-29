@@ -1,7 +1,7 @@
-import motor.motor_asyncio
+from pymongo import MongoClient
+import os
 
-MONGO_DETAILS = "mongodb://localhost:27017"
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
-database = client.students
+client = MongoClient(os.environ.get("MONGO_DB_URL"))
+db = client.did
 
-student_collection = database.get_collection("students_collection")
+student_collection =  db.student_collection
