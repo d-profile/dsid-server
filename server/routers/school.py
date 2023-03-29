@@ -1,23 +1,55 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, HTTPException
 from typing import List
 from server.helpers.database import student_collection
 
 school_router = APIRouter()
 
 @school_router.post("/create_students")
-async def create_student(names: List[str], numbers: List[int]) -> dict:
-    if len(names) != len(numbers):
+async def create_student(names: List[str], ids: List[int]) -> dict:
+    if len(names) != len(ids):
         raise HTTPException(status_code=400, detail="Invalid input")
 
-    for i, name in names:
+    items = []
+    for i, name in enumerate(names):
         item = {
             "name": name,
-            "number": numbers[i]
+            "_id": ids[i],
+            "status": "pending"
         }
 
-        print(item)
-        
-        # result = student_collection.insert_one(item)
+        items.append(item)
+
+    student_collection.insert_many(items)
+
+    return {
+        "message": "oke"
+    }
+
+@school_router.post("/verify")
+async def verify_doc(ids: List[int]) -> dict:
+    student_collection.update_many({
+        "_id": {
+            "$in": ids
+        }
+    }, {
+        "$set": {
+            "status": "verified"
+        }
+    })
+    return {
+        "message": "oke"
+    }
+
+@school_router.get("/students")
+async def get_students(limit: int = 10, page: int = 1) -> dict:
+    skip = limit * (page - 1)
+    return {
+        "message": list(student_collection.find().skip(skip=skip).limit(limit=limit))
+    }
+
+@school_router.post("/delete-all")
+async def delete() -> dict:
+    student_collection.delete_many({})
     return {
         "message": "oke"
     }
