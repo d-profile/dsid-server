@@ -39,7 +39,17 @@ async def update() -> dict:
     }
 
 @student_router.get("/student")
-async def get_student() -> dict:
+async def get_student(id: int) -> dict:
     return {
-        "message": "oke"
+        "message": dict(student_collection.find_one({"_id" : id}, {
+                        "selfie_image": 0,
+                        "id_front_image": 0,
+                        "id_back_image": 0
+                    }))
+    }
+
+@student_router.get("/student-document")
+async def get_student_document(id: int) -> dict:
+    return {
+        "message": dict(student_collection.find_one({"_id" : id}))
     }

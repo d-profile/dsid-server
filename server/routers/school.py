@@ -44,7 +44,11 @@ async def verify_doc(ids: List[int]) -> dict:
 async def get_students(limit: int = 10, page: int = 1) -> dict:
     skip = limit * (page - 1)
     return {
-        "message": list(student_collection.find().skip(skip=skip).limit(limit=limit))
+        "message": list(student_collection.find({}, {
+                        "selfie_image": 0,
+                        "id_front_image": 0,
+                        "id_back_image": 0
+                    }).skip(skip=skip).limit(limit=limit))
     }
 
 @school_router.post("/delete-all")
