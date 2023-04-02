@@ -4,7 +4,7 @@ from server.helpers.database import student_collection
 
 school_router = APIRouter()
 
-@school_router.post("/create_students")
+@school_router.post("/create-students")
 async def create_student(names: List[str], ids: List[int]) -> dict:
     if len(names) != len(ids):
         raise HTTPException(status_code=400, detail="Invalid input")
@@ -12,8 +12,8 @@ async def create_student(names: List[str], ids: List[int]) -> dict:
     items = []
     for i, name in enumerate(names):
         item = {
-            "name": name,
             "_id": ids[i],
+            "name": name,
             "status": "pending"
         }
 
