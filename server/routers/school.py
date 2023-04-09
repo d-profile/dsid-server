@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
+from pymerkle import MerkleTree
 from server.helpers.database import student_collection
+from server.helpers.blockchain import Blockchain
 
 school_router = APIRouter()
 
@@ -27,6 +29,26 @@ async def create_student(names: List[str], ids: List[int]) -> dict:
 
 @school_router.post("/verify")
 async def verify_doc(ids: List[int]) -> dict:
+    students = student_collection.find({
+        "_id": {
+            "$in": ids
+        }
+    })
+
+    addresses = []
+    merkle_roots = []
+
+    for student in students:
+        tree_leaves = [student["name"], str(student["day_of_birth"]), student["email"], student["phone_number"]]
+        merkle_tree = MerkleTree()
+        for data in tree_leaves:
+            merkle_tree.append_entry(data)
+
+        addresses.append(student["address"])
+        merkle_roots.append(str(merkle_tree.root))
+
+    blockchain = Blo
+
     student_collection.update_many({
         "_id": {
             "$in": ids

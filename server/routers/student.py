@@ -1,11 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from typing import List
+from server.helpers.blockchain import Blockchain
 from server.helpers.database import student_collection
 
 student_router = APIRouter()
 
 @student_router.post("/submit")
-async def submit(id: int, address: str, files: List[UploadFile] = File(...)) -> dict:
+async def submit(id: int, address: str, dob: int, email: str, phone_number: str, files: List[UploadFile] = File(...)) -> dict:
     student = student_collection.find_one({"_id": id})
 
     if student == None or student["status"] != "pending":
@@ -21,6 +22,9 @@ async def submit(id: int, address: str, files: List[UploadFile] = File(...)) -> 
     update_value = {
         "$set": {
             "address": address,
+            "day_of_birth": dob,
+            "email": email,
+            "phone_number": phone_number,
             "selfie_image": str(selfie_image),
             "id_front_image": str(id_front_image),
             "id_back_image": str(id_back_image)
@@ -40,6 +44,7 @@ async def update() -> dict:
 
 @student_router.get("/student")
 async def get_student(id: int) -> dict:
+    blockchain = Blockchain(private_key="")
     return {
         "message": dict(student_collection.find_one({"_id" : id}, {
                         "selfie_image": 0,
