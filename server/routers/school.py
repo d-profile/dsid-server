@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
-from pymerkle import MerkleTree
 from server.helpers.database import student_collection
-from server.helpers.blockchain import Blockchain
+from server.helpers.blockchain import blockchain
 
 school_router = APIRouter()
 
@@ -29,25 +28,29 @@ async def create_student(names: List[str], ids: List[int]) -> dict:
 
 @school_router.post("/verify")
 async def verify_doc(ids: List[int]) -> dict:
-    students = student_collection.find({
-        "_id": {
-            "$in": ids
+    students = student_collection.find(
+        {
+            "_id": {
+                "$in": ids
+            }
+        },
+        {
+            "_id": 1,
+            "address": 1,
+            "root": 1
         }
-    })
+    )
 
-    addresses = []
-    merkle_roots = []
+    student_addresses = []
+    student_ids = []
+    student_hashes = []
 
     for student in students:
-        tree_leaves = [student["name"], str(student["day_of_birth"]), student["email"], student["phone_number"]]
-        merkle_tree = MerkleTree()
-        for data in tree_leaves:
-            merkle_tree.append_entry(data)
+        student_addresses.append(student["address"])
+        student_ids.append(student["_id"])
+        student_hashes.append(student["root"])
 
-        addresses.append(student["address"])
-        merkle_roots.append(str(merkle_tree.root))
-
-    blockchain = Blo
+    hash: str = blockchain.mint_nft(addresses=student_addresses, token_ids=student_ids, roots=student_hashes)
 
     student_collection.update_many({
         "_id": {
@@ -58,19 +61,18 @@ async def verify_doc(ids: List[int]) -> dict:
             "status": "verified"
         }
     })
+
     return {
-        "message": "oke"
+        "message": {
+            "hash": hash
+        }
     }
 
 @school_router.get("/students")
 async def get_students(limit: int = 10, page: int = 1) -> dict:
     skip = limit * (page - 1)
     return {
-        "message": list(student_collection.find({}, {
-                        "selfie_image": 0,
-                        "id_front_image": 0,
-                        "id_back_image": 0
-                    }).skip(skip=skip).limit(limit=limit))
+        "message": list(student_collection.find({}).skip(skip=skip).limit(limit=limit))
     }
 
 @school_router.post("/delete-all")
