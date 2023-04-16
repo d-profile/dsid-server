@@ -1,5 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import List
+from fastapi import APIRouter, HTTPException
 from server.helpers.blockchain import blockchain
 from server.helpers.database import student_collection
 
