@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException
 from typing import List
+from pydantic import BaseModel
 from server.helpers.database import student_collection
 from server.helpers.blockchain import blockchain
 
@@ -26,12 +27,15 @@ async def create_student(names: List[str], ids: List[int]) -> dict:
         "message": "oke"
     }
 
+class VerifyData(BaseModel):
+    ids: List[int]
+
 @school_router.post("/verify")
-async def verify_doc(ids: List[int]) -> dict:
+async def verify_doc(data: VerifyData = Body(...)) -> dict:
     students = student_collection.find(
         {
             "_id": {
-                "$in": ids
+                "$in": data.ids
             }
         },
         {
@@ -50,11 +54,14 @@ async def verify_doc(ids: List[int]) -> dict:
         student_ids.append(student["_id"])
         student_hashes.append(student["root"])
 
+    if len(student_ids) == 0 or len(student_addresses) == 0 or len(student_hashes) == 0:
+        raise HTTPException(status_code=400, detail="Invalid student id")
+
     hash: str = blockchain.mint_nft(addresses=student_addresses, token_ids=student_ids, roots=student_hashes)
 
     student_collection.update_many({
         "_id": {
-            "$in": ids
+            "$in": data.ids
         }
     }, {
         "$set": {
