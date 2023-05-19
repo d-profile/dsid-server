@@ -97,5 +97,5 @@ async def update(info: UpdateInfo = Body(...)) -> dict:
 @student_router.get("/student")
 async def get_student(id: int) -> dict:
     return {
-        "message": dict(student_collection.find_one({"_id" : id}))
+        "message": dict(student_collection.find_one({"_id" : id}) or {})
     }
