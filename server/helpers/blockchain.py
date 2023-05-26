@@ -1,5 +1,4 @@
 from web3 import Web3
-from ethers import ethers
 from typing import List
 import json
 import os

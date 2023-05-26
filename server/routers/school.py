@@ -50,7 +50,7 @@ async def verify_doc(data: VerifyData = Body(...)) -> dict:
     student_hashes = []
 
     for student in students:
-        student_addresses.append(student["address"])
+        student_addresses.append(blockchain.w3.toChecksumAddress(student["address"]))
         student_ids.append(student["_id"])
         student_hashes.append(student["root"])
 
